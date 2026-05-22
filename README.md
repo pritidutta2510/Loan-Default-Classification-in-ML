@@ -16,10 +16,14 @@ which carry the highest financial risk for lenders.
 - Target variable: `loan_status` (0 = no default, 1 = default)
 - Class imbalance: 22.2% default rate
 
+## Methodology Summary
+1. **EDA & Preprocessing** — distribution analysis via histograms and count plots; correlation heatmap; IQR-based outlier detection; one-hot encoding for categorical variables (`loan_intent`, `person_education`, `person_home_ownership`); binary mapping for `previous_loan_defaults_on_file`; StandardScaler applied to all numeric features; 80/20 train-test split
+2. **Model Training** — four classifiers benchmarked: Logistic Regression (max_iter=1000), Decision Tree, Random Forest, and AdaBoost (all with random_state=42 for reproducibility); predictions evaluated via confusion matrix, classification report, and accuracy score
+3. **Model Evaluation & Interpretation** — ROC-AUC curve for Logistic Regression (AUC = 0.85); feature importance and partial dependence plots for Random Forest confirming `loan_int_rate` and `person_income` as top predictors; AdaBoost error-rate-per-estimator plot showing convergence stabilisation around 20–30 estimators
+
 ## Key Findings
 
 ### Model Comparison
-
 | Model               |  Accuracy | F1 (Class 1) | Recall (Class 1) | Precision (Class 1)  | False Negatives |
 |---------------------|-----------|--------------|------------------|----------------------|-----------------|
 | Logistic Regression | 84.14%    | 0.57         | 0.48             | 0.72                 | 1,047           |
@@ -57,3 +61,10 @@ achieves slightly higher recall for defaults (0.72 vs 0.67), Random Forest's
 superior precision (0.87 vs 0.69) and dramatically lower false positives make it 
 more suitable for real-world deployment where both missed defaults and unnecessary 
 rejections carry financial cost.
+
+## Limitations & Extensions
+- **Class imbalance unaddressed** — no SMOTE or class-weight adjustment was applied; oversampling or cost-sensitive learning could meaningfully improve recall for the minority class across all models
+- **Outliers retained** — IQR flagged data quality issues (e.g., age = 144, employment experience = 125 years) that were identified but not removed; cleaning these may improve model reliability
+- **No hyperparameter tuning** — all models used default parameters; GridSearchCV or RandomizedSearchCV on Random Forest and AdaBoost could push performance further
+- **AdaBoost convergence** — error rate stabilises around 20–30 estimators, suggesting the default of 50 is sufficient but tuning `n_estimators` and `learning_rate` is a logical next step
+- **XGBoost or LightGBM** — gradient boosting frameworks not benchmarked here; likely to outperform AdaBoost on this imbalanced tabular dataset
